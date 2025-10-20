@@ -69,7 +69,7 @@ Este projeto implementa um processador de PDF para extrair dados de notas fiscai
 
 3. Verifique se o arquivo `.env` contém a chave da API Gemini:
    ```
-   GEMINI_API_KEY=AIzaSyCOHbhUaZdxTufCWxoP24dThplKrjPb2Jo
+   GEMINI_API_KEY=***SUA_CHAVE_API_GEMINI***
    PORT=5000
    ```
 
