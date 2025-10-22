@@ -29,11 +29,11 @@ async function processInvoiceWithGemini(pdfText) {
     
     Detalhes da Nota:
     - Número da Nota Fiscal
-    - Data de Emissão
+    - Data de Emissão (Formato YYYY-MM-DD)
     - Descrição dos produtos
     - Quantidade de Parcelas
     - Data de Vencimento
-    - ValorTotal
+    - ValorTotal (Formato YYYY-MM-DD)
     
     Classificação da DESPESA:
     - Analise os produtos/serviços descritos na nota fiscal e classifique a despesa de acordo com a natureza do gasto.
@@ -73,12 +73,12 @@ async function processInvoiceWithGemini(pdfText) {
       },
       "notaFiscal": {
         "numero": "",
-        "dataEmissao": "",
+        "dataEmissao": "", (Formato YYYY-MM-DD)
         "descricaoProdutos": "",
         "parcelas": [
           {
             "numero": 1,
-            "dataVencimento": "",
+            "dataVencimento": "", (Formato YYYY-MM-DD)
             "valor": 0
           }
         ],

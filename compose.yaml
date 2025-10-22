@@ -1,14 +1,17 @@
-version: "3.8"
+# compose.yaml (corrigido)
+
 
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: app_frontend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - REACT_APP_API_URL=http://localhost:5000
     depends_on:
       - backend
 
@@ -16,9 +19,39 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: app_backend
     ports:
       - "5000:5000"
     env_file:
       - ./backend/.env
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=sistema_financeiro
     volumes:
       - ./backend/uploads:/usr/src/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db  # Nome fixo do container
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sistema_financeiro
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+      interval: 10s
+
+volumes:
+  mysql_data:
