@@ -1,4 +1,3 @@
-// src/components/InvoiceResult.js (atualizado)
 import React, { useState } from 'react';
 import { 
   Typography, 

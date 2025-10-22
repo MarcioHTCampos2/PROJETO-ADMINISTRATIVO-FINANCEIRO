@@ -11,7 +11,10 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
-const SaveResult = ({ savedData, onBack }) => {
+const SaveResult = ({ savedData, onBack, onProcessAnother }) => {
+  // Usar onProcessAnother se disponível, caso contrário usar onBack para compatibilidade
+  const handleProcessAnother = onProcessAnother || onBack;
+
   return (
     <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
       <CheckCircleIcon sx={{ fontSize: 60, color: 'success.main', mb: 2 }} />
@@ -55,7 +58,7 @@ const SaveResult = ({ savedData, onBack }) => {
         variant="contained"
         color="primary"
         startIcon={<RestartAltIcon />}
-        onClick={onBack}
+        onClick={handleProcessAnother}
         size="large"
       >
         Processar Outro PDF
@@ -65,3 +68,4 @@ const SaveResult = ({ savedData, onBack }) => {
 };
 
 export default SaveResult;
+
