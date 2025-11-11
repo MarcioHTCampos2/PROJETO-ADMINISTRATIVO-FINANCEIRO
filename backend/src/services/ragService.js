@@ -50,9 +50,10 @@ function cosineSimilarity(a, b) {
 }
 
 async function embedText(text) {
-  // Usa o modelo de embeddings do Gemini
-  const embeddingModel = genAI.getEmbeddingModel({ model: 'text-embedding-004' });
-  const result = await embeddingModel.embedContent(text);
+  // Usa o modelo de embeddings pela API atual
+  // Algumas versões expõem apenas getGenerativeModel para o modelo de embeddings
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const result = await model.embedContent(text);
   const embedding = result?.embedding?.values || [];
   return embedding;
 }
