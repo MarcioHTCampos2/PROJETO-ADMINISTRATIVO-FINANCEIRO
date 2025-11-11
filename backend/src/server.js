@@ -5,6 +5,7 @@ const pdfParse = require('pdf-parse');
 const cors = require('cors');
 const { processInvoiceWithGemini } = require('./services/geminiService');
 const databaseService = require('./services/databaseService');
+const ragService = require('./services/ragService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -98,6 +99,44 @@ app.get('/api/health', (req, res) => {
     message: 'Servidor está funcionando',
     timestamp: new Date().toISOString()
   });
+});
+
+// ===== RAG: Indexação do esquema e consulta =====
+// Recriar índice de embeddings do esquema do banco
+app.post('/api/rag/index', async (req, res) => {
+  try {
+    const result = await ragService.buildSchemaIndex();
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('Erro ao indexar esquema:', error);
+    res.status(500).json({ error: error.message || 'Erro ao indexar esquema' });
+  }
+});
+
+// Consultar com RAG (simple ou embeddings)
+app.post('/api/rag/query', async (req, res) => {
+  try {
+    const { question, mode } = req.body || {};
+    if (!question) {
+      return res.status(400).json({ error: 'Campo "question" é obrigatório' });
+    }
+    const selected = (mode || 'simple').toLowerCase();
+    let data;
+    if (selected === 'embeddings') {
+      data = await ragService.queryEmbeddings(question);
+    } else {
+      data = await ragService.querySimple(question);
+    }
+
+    if (data && data.error) {
+      return res.status(400).json(data);
+    }
+
+    res.json({ success: true, ...data });
+  } catch (error) {
+    console.error('Erro na consulta RAG:', error);
+    res.status(500).json({ error: error.message || 'Erro ao consultar RAG' });
+  }
 });
 
 // Função para analisar dados no banco

@@ -1,10 +1,12 @@
 // App.js (atualizado)
 import React, { useState } from 'react';
-import { Container, Paper, Typography, Box, Button, CircularProgress, Alert } from '@mui/material';
+import { Container, Paper, Typography, Box, Button, CircularProgress, Alert, ToggleButtonGroup, ToggleButton, Divider } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import axios from 'axios';
 import InvoiceResult from './components/InvoiceResult';
+import RagQuery from './components/RagQuery';
 import './App.css';
+const API_BASE = process.env.REACT_APP_API_URL || '';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -13,6 +15,7 @@ function App() {
   const [error, setError] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
   const [processingStep, setProcessingStep] = useState('upload'); // 'upload', 'processing', 'result'
+  const [view, setView] = useState('pdf'); // 'pdf' | 'rag'
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -41,7 +44,7 @@ function App() {
     formData.append('pdfFile', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/process-pdf', formData, {
+      const response = await axios.post(`${API_BASE}/api/process-pdf`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -76,7 +79,7 @@ function App() {
   };
 
   // Renderizar conteúdo baseado no passo atual
-  const renderContent = () => {
+  const renderPdfContent = () => {
     switch (processingStep) {
       case 'upload':
         return (
@@ -154,16 +157,47 @@ function App() {
     }
   };
 
+  const renderContent = () => {
+    if (view === 'rag') {
+      return (
+        <Box className="rag-section">
+          <RagQuery />
+        </Box>
+      );
+    }
+    return renderPdfContent();
+  };
+
   return (
     <Container maxWidth="md" className="app-container">
       <Paper elevation={3} className="main-paper">
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          Processador de Notas Fiscais
+          Processador de Notas Fiscais e Busca RAG
         </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <ToggleButtonGroup
+            color="primary"
+            value={view}
+            exclusive
+            onChange={(e, val) => val && setView(val)}
+            size="small"
+          >
+            <ToggleButton value="pdf">Notas Fiscais</ToggleButton>
+            <ToggleButton value="rag">RAG Banco de Dados</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
         
-        <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
-          Extraia automaticamente dados de notas fiscais PDF e gerencie no banco de dados
-        </Typography>
+        {view === 'pdf' && (
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Extraia automaticamente dados de notas fiscais PDF e gerencie no banco de dados
+          </Typography>
+        )}
+        {view === 'rag' && (
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Digite perguntas sobre o banco de dados e receba respostas elaboradas com LLM
+          </Typography>
+        )}
 
         {renderContent()}
       </Paper>
