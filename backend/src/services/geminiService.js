@@ -1,8 +1,9 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
-// Configuração da API do Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Configuração da API do LLM (seguro via variável de ambiente)
+const LLM_API_KEY = process.env.LLM_API_KEY || process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(LLM_API_KEY);
 
 /**
  * Processa o texto da nota fiscal usando o modelo Gemini

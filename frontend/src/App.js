@@ -9,7 +9,17 @@ import ManterPessoas from './components/ManterPessoas';
 import ManterClassificacao from './components/ManterClassificacao';
 import ManterContas from './components/ManterContas';
 import './App.css';
-const API_BASE = process.env.REACT_APP_API_URL || '';
+const API_BASE = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL || '';
+// Prefixa automaticamente chamadas relativas "/api" com a URL do backend
+if (typeof window !== 'undefined' && API_BASE) {
+  const originalFetch = window.fetch;
+  window.fetch = (input, init) => {
+    if (typeof input === 'string' && input.startsWith('/api')) {
+      return originalFetch(`${API_BASE}${input}`, init);
+    }
+    return originalFetch(input, init);
+  };
+}
 
 function App() {
   const [file, setFile] = useState(null);

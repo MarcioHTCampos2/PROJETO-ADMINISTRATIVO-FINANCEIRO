@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Paper, Typography, TextField, Button, ToggleButtonGroup, ToggleButton, CircularProgress, Alert, Divider } from '@mui/material';
 import axios from 'axios';
-const API_BASE = process.env.REACT_APP_API_URL || '';
+const API_BASE = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL || '';
 
 function RagQuery() {
   const [question, setQuestion] = useState('');

@@ -4,7 +4,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const databaseService = require('./databaseService');
 require('dotenv').config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const LLM_API_KEY = process.env.LLM_API_KEY || process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(LLM_API_KEY);
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
 const INDEX_PATH = path.join(UPLOADS_DIR, 'rag_index.json');
 

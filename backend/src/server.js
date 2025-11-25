@@ -10,7 +10,18 @@ const ragService = require('./services/ragService');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// CORS restrito: permite apenas FRONTEND_URL (produção) e localhost:3000
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000'].filter(Boolean);
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite ferramentas sem origin (como curl/postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 const storage = multer.memoryStorage();
