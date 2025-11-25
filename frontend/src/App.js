@@ -5,6 +5,9 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import axios from 'axios';
 import InvoiceResult from './components/InvoiceResult';
 import RagQuery from './components/RagQuery';
+import ManterPessoas from './components/ManterPessoas';
+import ManterClassificacao from './components/ManterClassificacao';
+import ManterContas from './components/ManterContas';
 import './App.css';
 const API_BASE = process.env.REACT_APP_API_URL || '';
 
@@ -15,7 +18,7 @@ function App() {
   const [error, setError] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
   const [processingStep, setProcessingStep] = useState('upload'); // 'upload', 'processing', 'result'
-  const [view, setView] = useState('pdf'); // 'pdf' | 'rag'
+  const [view, setView] = useState('pdf'); // 'pdf' | 'rag' | 'contas' | 'pessoas' | 'classificacao'
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -165,6 +168,27 @@ function App() {
         </Box>
       );
     }
+    if (view === 'contas') {
+      return (
+        <Box className="contas-section">
+          <ManterContas />
+        </Box>
+      );
+    }
+    if (view === 'pessoas') {
+      return (
+        <Box className="pessoas-section">
+          <ManterPessoas />
+        </Box>
+      );
+    }
+    if (view === 'classificacao') {
+      return (
+        <Box className="classificacao-section">
+          <ManterClassificacao />
+        </Box>
+      );
+    }
     return renderPdfContent();
   };
 
@@ -184,6 +208,9 @@ function App() {
           >
             <ToggleButton value="pdf">Notas Fiscais</ToggleButton>
             <ToggleButton value="rag">RAG Banco de Dados</ToggleButton>
+            <ToggleButton value="contas">Manter Contas</ToggleButton>
+            <ToggleButton value="pessoas">Manter Pessoas</ToggleButton>
+            <ToggleButton value="classificacao">Manter Classificação</ToggleButton>
           </ToggleButtonGroup>
         </Box>
         <Divider sx={{ mb: 2 }} />
@@ -196,6 +223,21 @@ function App() {
         {view === 'rag' && (
           <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
             Digite perguntas sobre o banco de dados e receba respostas elaboradas com LLM
+          </Typography>
+        )}
+        {view === 'contas' && (
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Tabela vazia inicialmente. Use Busca ou Todos (ATIVO).
+          </Typography>
+        )}
+        {view === 'pessoas' && (
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Gerencie Fornecedor, Cliente e Faturado. Status é oculto (ATIVO/INATIVO).
+          </Typography>
+        )}
+        {view === 'classificacao' && (
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Cadastre e edite classificações de Receita/Despesa. Exclusão é lógica.
           </Typography>
         )}
 

@@ -234,6 +234,116 @@ class DatabaseService {
       throw error;
     }
   }
+
+  // ===== Pessoas =====
+  async listarPessoas({ tipo, status = 'ATIVO', q }) {
+    const conn = await this.connect();
+    const where = [];
+    const params = [];
+    if (tipo) { where.push('tipo = ?'); params.push(tipo); }
+    if (status) { where.push('status = ?'); params.push(status); }
+    if (q) { where.push('(razaosocial LIKE ? OR fantasia LIKE ? OR documento LIKE ?)'); params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
+    const sql = `SELECT idPessoas, tipo, razaosocial, fantasia, documento, status FROM Pessoas` + (where.length ? ` WHERE ${where.join(' AND ')}` : '');
+    const [rows] = await conn.execute(sql, params);
+    return rows;
+  }
+
+  async criarPessoa({ tipo, razaosocial, fantasia, documento }) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `INSERT INTO Pessoas (tipo, razaosocial, fantasia, documento, status) VALUES (?, ?, ?, ?, 'ATIVO')`,
+      [tipo, razaosocial, fantasia || razaosocial, documento]
+    );
+    return result.insertId;
+  }
+
+  async atualizarPessoa(id, { razaosocial, fantasia, documento }) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE Pessoas SET razaosocial = ?, fantasia = ?, documento = ? WHERE idPessoas = ?`,
+      [razaosocial, fantasia || razaosocial, documento, id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async inativarPessoa(id) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE Pessoas SET status = 'INATIVO' WHERE idPessoas = ?`,
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  // ===== Classificacao =====
+  async listarClassificacao({ tipo, status = 'ATIVO', q }) {
+    const conn = await this.connect();
+    const where = [];
+    const params = [];
+    if (tipo) { where.push('tipo = ?'); params.push(tipo); }
+    if (status) { where.push('status = ?'); params.push(status); }
+    if (q) { where.push('(descricao LIKE ?)'); params.push(`%${q}%`); }
+    const sql = `SELECT idClassificacao, tipo, descricao, status FROM Classificacao` + (where.length ? ` WHERE ${where.join(' AND ')}` : '');
+    const [rows] = await conn.execute(sql, params);
+    return rows;
+  }
+
+  async criarClassificacao({ tipo, descricao }) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `INSERT INTO Classificacao (tipo, descricao, status) VALUES (?, ?, 'ATIVO')`,
+      [tipo, descricao]
+    );
+    return result.insertId;
+  }
+
+  async atualizarClassificacao(id, { descricao }) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE Classificacao SET descricao = ? WHERE idClassificacao = ?`,
+      [descricao, id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async inativarClassificacao(id) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE Classificacao SET status = 'INATIVO' WHERE idClassificacao = ?`,
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  // ===== MovimentoContas (Contas) =====
+  async listarMovimentos({ status = 'ATIVO', q }) {
+    const conn = await this.connect();
+    const where = [];
+    const params = [];
+    if (status) { where.push('status = ?'); params.push(status); }
+    if (q) { where.push('(descricao LIKE ? OR numeronotafiscal LIKE ?)'); params.push(`%${q}%`, `%${q}%`); }
+    const sql = `SELECT idMovimentoContas, tipo, numeronotafiscal, dataemissao, descricao, status, valortotal FROM MovimentoContas` + (where.length ? ` WHERE ${where.join(' AND ')}` : '');
+    const [rows] = await conn.execute(sql, params);
+    return rows;
+  }
+
+  async atualizarMovimento(id, { tipo, numeronotafiscal, dataemissao, descricao, valortotal }) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE MovimentoContas SET tipo = ?, numeronotafiscal = ?, dataemissao = ?, descricao = ?, valortotal = ? WHERE idMovimentoContas = ?`,
+      [tipo, numeronotafiscal, dataemissao, descricao, valortotal, id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async inativarMovimento(id) {
+    const conn = await this.connect();
+    const [result] = await conn.execute(
+      `UPDATE MovimentoContas SET status = 'INATIVO' WHERE idMovimentoContas = ?`,
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = new DatabaseService();

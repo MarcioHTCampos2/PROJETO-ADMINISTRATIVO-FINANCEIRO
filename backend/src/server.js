@@ -139,6 +139,139 @@ app.post('/api/rag/query', async (req, res) => {
   }
 });
 
+// ===== CRUD Lógico: Pessoas =====
+app.get('/api/pessoas', async (req, res) => {
+  try {
+    const { tipo, status = 'ATIVO', q } = req.query;
+    const rows = await databaseService.listarPessoas({ tipo, status, q });
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Erro ao listar pessoas:', error);
+    res.status(500).json({ error: error.message || 'Erro ao listar pessoas' });
+  }
+});
+
+app.post('/api/pessoas', async (req, res) => {
+  try {
+    const { tipo, razaosocial, fantasia, documento } = req.body;
+    if (!tipo || !razaosocial || !documento) {
+      return res.status(400).json({ error: 'Campos obrigatórios: tipo, razaosocial, documento' });
+    }
+    const id = await databaseService.criarPessoa({ tipo, razaosocial, fantasia, documento });
+    res.json({ success: true, id });
+  } catch (error) {
+    console.error('Erro ao criar pessoa:', error);
+    res.status(500).json({ error: error.message || 'Erro ao criar pessoa' });
+  }
+});
+
+app.put('/api/pessoas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { razaosocial, fantasia, documento } = req.body;
+    const ok = await databaseService.atualizarPessoa(id, { razaosocial, fantasia, documento });
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao atualizar pessoa:', error);
+    res.status(500).json({ error: error.message || 'Erro ao atualizar pessoa' });
+  }
+});
+
+app.delete('/api/pessoas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ok = await databaseService.inativarPessoa(id);
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao inativar pessoa:', error);
+    res.status(500).json({ error: error.message || 'Erro ao inativar pessoa' });
+  }
+});
+
+// ===== CRUD Lógico: Classificacao =====
+app.get('/api/classificacao', async (req, res) => {
+  try {
+    const { tipo, status = 'ATIVO', q } = req.query;
+    const rows = await databaseService.listarClassificacao({ tipo, status, q });
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Erro ao listar classificacao:', error);
+    res.status(500).json({ error: error.message || 'Erro ao listar classificacao' });
+  }
+});
+
+app.post('/api/classificacao', async (req, res) => {
+  try {
+    const { tipo, descricao } = req.body;
+    if (!tipo || !descricao) {
+      return res.status(400).json({ error: 'Campos obrigatórios: tipo, descricao' });
+    }
+    const id = await databaseService.criarClassificacao({ tipo, descricao });
+    res.json({ success: true, id });
+  } catch (error) {
+    console.error('Erro ao criar classificacao:', error);
+    res.status(500).json({ error: error.message || 'Erro ao criar classificacao' });
+  }
+});
+
+app.put('/api/classificacao/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { descricao } = req.body;
+    const ok = await databaseService.atualizarClassificacao(id, { descricao });
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao atualizar classificacao:', error);
+    res.status(500).json({ error: error.message || 'Erro ao atualizar classificacao' });
+  }
+});
+
+app.delete('/api/classificacao/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ok = await databaseService.inativarClassificacao(id);
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao inativar classificacao:', error);
+    res.status(500).json({ error: error.message || 'Erro ao inativar classificacao' });
+  }
+});
+
+// ===== CRUD Lógico: Contas (MovimentoContas) =====
+app.get('/api/contas', async (req, res) => {
+  try {
+    const { status = 'ATIVO', q } = req.query;
+    const rows = await databaseService.listarMovimentos({ status, q });
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error('Erro ao listar contas:', error);
+    res.status(500).json({ error: error.message || 'Erro ao listar contas' });
+  }
+});
+
+app.put('/api/contas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tipo, numeronotafiscal, dataemissao, descricao, valortotal } = req.body;
+    const ok = await databaseService.atualizarMovimento(id, { tipo, numeronotafiscal, dataemissao, descricao, valortotal });
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao atualizar movimento:', error);
+    res.status(500).json({ error: error.message || 'Erro ao atualizar movimento' });
+  }
+});
+
+app.delete('/api/contas/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ok = await databaseService.inativarMovimento(id);
+    res.json({ success: ok });
+  } catch (error) {
+    console.error('Erro ao inativar movimento:', error);
+    res.status(500).json({ error: error.message || 'Erro ao inativar movimento' });
+  }
+});
+
 // Função para analisar dados no banco
 async function analisarDadosNoBanco(invoiceData) {
   const analise = {
