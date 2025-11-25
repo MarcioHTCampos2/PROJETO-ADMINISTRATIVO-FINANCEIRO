@@ -1,9 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
-
-// Configuração da API do LLM (seguro via variável de ambiente)
-const LLM_API_KEY = process.env.LLM_API_KEY || process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(LLM_API_KEY);
+const { ensureLLMKey } = require('../utils/llmKey');
 
 /**
  * Processa o texto da nota fiscal usando o modelo Gemini
@@ -12,7 +9,9 @@ const genAI = new GoogleGenerativeAI(LLM_API_KEY);
  */
 async function processInvoiceWithGemini(pdfText) {
   try {
-    // Usar o modelo Gemini Pro padrão que é compatível com a API atual
+    const key = await ensureLLMKey();
+    const genAI = new GoogleGenerativeAI(key);
+    // Usar o modelo Gemini padrão
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Prompt para extrair informações específicas da nota fiscal

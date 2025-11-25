@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const cors = require('cors');
+const { setLLMKey } = require('./utils/llmKey');
 const { processInvoiceWithGemini } = require('./services/geminiService');
 const databaseService = require('./services/databaseService');
 const ragService = require('./services/ragService');
@@ -22,6 +23,30 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Endpoint de configuração da LLM key em runtime (controlado por envs)
+app.post('/api/admin/llm-key', async (req, res) => {
+  try {
+    const allow = process.env.ALLOW_RUNTIME_LLM_KEY === 'true';
+    if (!allow) {
+      return res.status(403).json({ error: 'Runtime LLM key setup desabilitado' });
+    }
+    const setupToken = process.env.SETUP_TOKEN;
+    const providedToken = req.headers['x-setup-token'];
+    if (!setupToken || !providedToken || providedToken !== setupToken) {
+      return res.status(401).json({ error: 'Token inválido para configuração' });
+    }
+    const { key } = req.body || {};
+    if (!key || typeof key !== 'string') {
+      return res.status(400).json({ error: 'Chave LLM ausente ou inválida' });
+    }
+    setLLMKey(key);
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao configurar LLM key:', error);
+    return res.status(500).json({ error: error.message || 'Erro interno' });
+  }
+});
 app.use(express.json());
 
 const storage = multer.memoryStorage();

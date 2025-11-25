@@ -3,9 +3,7 @@ const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const databaseService = require('./databaseService');
 require('dotenv').config();
-
-const LLM_API_KEY = process.env.LLM_API_KEY || process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(LLM_API_KEY);
+const { ensureLLMKey } = require('../utils/llmKey');
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
 const INDEX_PATH = path.join(UPLOADS_DIR, 'rag_index.json');
 
@@ -53,6 +51,8 @@ function cosineSimilarity(a, b) {
 async function embedText(text) {
   // Usa o modelo de embeddings pela API atual
   // Algumas versões expõem apenas getGenerativeModel para o modelo de embeddings
+  const key = await ensureLLMKey();
+  const genAI = new GoogleGenerativeAI(key);
   const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
   const result = await model.embedContent(text);
   const embedding = result?.embedding?.values || [];
@@ -60,6 +60,8 @@ async function embedText(text) {
 }
 
 async function generateAnswer(contextText, question) {
+  const key = await ensureLLMKey();
+  const genAI = new GoogleGenerativeAI(key);
   const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
   const prompt = `Você é um assistente especializado em responder perguntas sobre um banco de dados MySQL.
 Use EXCLUSIVAMENTE o contexto fornecido para responder com clareza e objetividade.
