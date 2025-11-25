@@ -11,18 +11,35 @@ const ragService = require('./services/ragService');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS restrito: permite apenas FRONTEND_URL (produção) e localhost:3000
-const FRONTEND_URL = process.env.FRONTEND_URL;
-const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000'].filter(Boolean);
+// Parse JSON bodies before all routes
+app.use(express.json());
+
+// CORS: permite apenas origens explicitamente autorizadas
+const FRONTEND_URL = process.env.FRONTEND_URL; // defina isto no Render com seu domínio Vercel
+const EXTRA_ALLOWED = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000', ...EXTRA_ALLOWED].filter(Boolean);
+const vercelAppPattern = /^https:\/\/.*\.vercel\.app$/;
+const vercelDevPattern = /^https:\/\/.*\.vercel\.dev$/;
 app.use(cors({
   origin: function (origin, callback) {
     // Permite ferramentas sem origin (como curl/postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      vercelAppPattern.test(origin) ||
+      vercelDevPattern.test(origin)
+    ) {
+      return callback(null, true);
+    }
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
+// Trata preflight para todos os caminhos
+app.options('*', cors());
 
 // Endpoint de configuração da LLM key em runtime (controlado por envs)
 app.post('/api/admin/llm-key', async (req, res) => {
@@ -47,7 +64,6 @@ app.post('/api/admin/llm-key', async (req, res) => {
     return res.status(500).json({ error: error.message || 'Erro interno' });
   }
 });
-app.use(express.json());
 
 const storage = multer.memoryStorage();
 const upload = multer({ 
