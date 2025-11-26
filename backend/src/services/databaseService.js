@@ -50,7 +50,12 @@ class DatabaseService {
 
   async connect() {
     if (!this.connection) {
+      // Log de diagnóstico para confirmar alvo da conexão
+      const safeCfg = { ...dbConfig };
+      if (safeCfg.password) safeCfg.password = '***';
+      console.log('Conectando ao MySQL com config:', safeCfg);
       this.connection = await mysql.createConnection(dbConfig);
+      console.log('Conexão MySQL estabelecida');
     }
     return this.connection;
   }
