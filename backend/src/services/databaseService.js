@@ -1,4 +1,6 @@
 // backend/src/services/databaseService.js
+
+
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -13,7 +15,7 @@ function buildDbConfigFromEnv() {
       const port = Number(u.port || 3306);
       const user = decodeURIComponent(u.username || '');
       const password = decodeURIComponent(u.password || '');
-      const database = (u.pathname || '/sistema_financeiro').replace(/^\//, '');
+      const database = (u.pathname || '/railway').replace(/^\//, '');
       const sslParam = (u.searchParams.get('ssl') || '').toLowerCase() === 'true';
       const useSsl = sslFlag || sslParam;
       const cfg = { host, port, user, password, database };
