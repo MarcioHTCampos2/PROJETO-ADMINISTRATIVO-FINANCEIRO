@@ -2,13 +2,44 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'password',
-  database: process.env.DB_NAME || 'sistema_financeiro',
-  port: process.env.DB_PORT || 3306
-};
+function buildDbConfigFromEnv() {
+  // Suporte a DSN: MYSQL_URL/DATABASE_URL -> mysql://user:pass@host:port/db?ssl=true
+  const dsn = process.env.MYSQL_URL || process.env.DATABASE_URL;
+  const sslFlag = (process.env.DB_SSL || '').toLowerCase() === 'true';
+  if (dsn) {
+    try {
+      const u = new URL(dsn);
+      const host = u.hostname;
+      const port = Number(u.port || 3306);
+      const user = decodeURIComponent(u.username || '');
+      const password = decodeURIComponent(u.password || '');
+      const database = (u.pathname || '/sistema_financeiro').replace(/^\//, '');
+      const sslParam = (u.searchParams.get('ssl') || '').toLowerCase() === 'true';
+      const useSsl = sslFlag || sslParam;
+      const cfg = { host, port, user, password, database };
+      if (useSsl) {
+        cfg.ssl = { rejectUnauthorized: false };
+      }
+      return cfg;
+    } catch (e) {
+      console.warn('Falha ao interpretar DSN MYSQL_URL/DATABASE_URL, caindo para variáveis discretas:', e.message);
+    }
+  }
+  // Variáveis discretas (compatível com Docker Compose local)
+  const cfg = {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'password',
+    database: process.env.DB_NAME || 'sistema_financeiro',
+    port: Number(process.env.DB_PORT || 3306)
+  };
+  if (sslFlag) {
+    cfg.ssl = { rejectUnauthorized: false };
+  }
+  return cfg;
+}
+
+const dbConfig = buildDbConfigFromEnv();
 
 class DatabaseService {
   constructor() {

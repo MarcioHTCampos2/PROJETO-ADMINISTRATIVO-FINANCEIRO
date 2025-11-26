@@ -15,6 +15,8 @@ const PORT = process.env.PORT || 5000;
 // Parse JSON bodies before all routes
 app.use(express.json());
 
+
+
 // CORS: permite apenas origens explicitamente autorizadas
 const FRONTEND_URL = process.env.FRONTEND_URL; // defina isto no Render com seu domínio Vercel
 const EXTRA_ALLOWED = (process.env.CORS_ALLOWED_ORIGINS || '')
