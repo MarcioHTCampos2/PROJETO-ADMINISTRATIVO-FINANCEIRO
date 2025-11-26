@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const cors = require('cors');
+const { initDatabaseIfNeeded } = require('./utils/dbInit');
 const { setLLMKey } = require('./utils/llmKey');
 const { processInvoiceWithGemini } = require('./services/geminiService');
 const databaseService = require('./services/databaseService');
@@ -455,3 +456,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📊 Health check disponível em: http://localhost:${PORT}/api/health`);
 });
+
+// Inicializa banco (opcional, controlado por env)
+initDatabaseIfNeeded();
